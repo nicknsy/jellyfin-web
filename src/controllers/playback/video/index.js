@@ -1304,6 +1304,40 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             resetIdle();
         }
 
+        function getTrickplayBubbleHtml(apiClient, trickplayInfo, item, mediaSourceId, positionTicks) {
+            const currentTimeMs = positionTicks / 10_000;
+            const currentTile = Math.floor(currentTimeMs / trickplayInfo.Interval);
+
+            const tileSize = trickplayInfo.TileWidth * trickplayInfo.TileHeight;
+            const tileOffset = currentTile % tileSize;
+            const index = Math.floor(currentTile / tileSize);
+
+            const tileOffsetX = tileOffset % trickplayInfo.TileWidth;
+            const tileOffsetY = Math.floor(tileOffset / trickplayInfo.TileWidth);
+            const offsetX = -(tileOffsetX * trickplayInfo.Width);
+            const offsetY = -(tileOffsetY * trickplayInfo.Height);
+
+            const src = apiClient.getUrl('Videos/' + item.Id + '/Trickplay/' + trickplayInfo.Width + '/' + index + '.jpg', {
+                api_key: apiClient.accessToken(),
+                MediaSourceId: mediaSourceId
+            });
+
+            if (src) {
+                let html = '<div class="chapterThumbContainer" style="overflow: hidden;">';
+                html += '<div class="chapterThumbWrapper" style="overflow: hidden; position: relative; width: ' + trickplayInfo.Width + 'px; height: ' + trickplayInfo.Height + 'px;">';
+                html += '<img class="chapterThumb" src="' + src + '" style="position: absolute; width: unset; min-width: unset; height: unset; min-height: unset; left: ' + offsetX + 'px; top: ' + offsetY + 'px;" />';
+                html += '</div>';
+                html += '<div class="chapterThumbTextContainer">';
+                html += '<h2 class="chapterThumbText">';
+                html += datetime.getDisplayRunningTime(positionTicks);
+                html += '</h2>';
+                html += '</div>';
+                return html + '</div>';
+            }
+
+            return null;
+        }
+
         function getImgUrl(item, chapter, index, maxWidth, apiClient) {
             if (chapter.ImageTag) {
                 return apiClient.getScaledImageUrl(item.Id, {
@@ -1647,6 +1681,20 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             ticks /= 100;
             ticks *= value;
             const item = currentItem;
+
+            if (item && item.Trickplay) {
+                const mediaSourceId = currentPlayer?.streamInfo?.mediaSource?.Id;
+                const trickplayResolutions = item.Trickplay[mediaSourceId];
+
+                if (trickplayResolutions) {
+                    // TODO: just to test. must pick proper resolution and/or check above that trickplay resolutions has at least one key.
+                    const html = getTrickplayBubbleHtml(ServerConnections.getApiClient(item.ServerId), trickplayResolutions[Object.keys(trickplayResolutions)[0]], item, mediaSourceId, ticks);
+
+                    if (html) {
+                        return html;
+                    }
+                }
+            }
 
             if (item && item.Chapters && item.Chapters.length && item.Chapters[0].ImageTag) {
                 const html = getChapterBubbleHtml(ServerConnections.getApiClient(item.ServerId), item, item.Chapters, ticks);
