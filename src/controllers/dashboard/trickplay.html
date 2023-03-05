@@ -1,0 +1,71 @@
+<div id="trickplayConfigurationPage" data-role="page" class="page type-interior playbackConfigurationPage withTabs">
+    <div>
+        <div class="content-primary">
+            <form class="trickplayConfigurationForm">
+                <div class="sectionTitleContainer flex align-items-center">
+                    <h2 class="sectionTitle">${Trickplay}</h2>
+                </div>
+                <div class="checkboxListContainer">
+                    <div class="checkboxList">
+                        <label>
+                            <input type="checkbox" is="emby-checkbox" id="chkEnableHwAcceleration" />
+                            <span>Enable hardware acceleration</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="inputContainer">
+                    <select is="emby-select" id="selectScanBehavior" name="Scan Behavior" label="Scan Behavior">
+                        <option id="optNonBlocking" value="NonBlocking">Non Blocking - queues generation, then returns</option>
+                        <option id="optBlocking" value="Blocking">Blocking - queues generation, blocks scan until complete</option>
+                    </select>
+                    <div class="fieldDescription">The default behavior is non blocking, which will add media to the library before trickplay generation is done.</div>
+                    <div class="fieldDescription">Blocking will ensure trickplay files are generated before media is added to the library, but will make scans significantly longer.</div>
+                </div>
+                <div class="inputContainer">
+                    <select is="emby-select" id="selectProcessPriority" name="Process Priority" label="Process Priority">
+                        <option id="optPriorityHigh" value="High">High</option>
+                        <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
+                        <option id="optPriorityNormal" value="Normal">Normal</option>
+                        <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
+                        <option id="optPriorityIdle" value="Idle">Idle</option>
+                    </select>
+                    <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg preview images generation process in relation to other processes.</div>
+                    <div class="fieldDescription">If you notice slowdown while generating preview images but don't want to fully stop their generation, try lowering this as well as the thread count.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtInterval" pattern="[0-9]*" min="0" required label="Image Interval" />
+                    <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" id="txtWidthResolutions" pattern="[0-9,]*" required label="Width Resolutions">
+                    <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
+                    <div class="fieldDescription">All images <strong>try</strong> to generate proportionally to the source, so a width of 320 on a 16:9 video ends up <strong>around</strong> 320x180.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtTileWidth" pattern="[0-9]*" min="1" required label="Tile Width">
+                    <div class="fieldDescription">Maximum number of images to tile in X direction.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtTileHeight" pattern="[0-9]*" min="1" required label="Tile Height">
+                    <div class="fieldDescription">Maximum number of images to tile in Y direction.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtJpegQuality" pattern="[0-9]*" min="1" max="100" required label="JPEG Quality">
+                    <div class="fieldDescription">The image quality for preview image tiles.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtQscale" pattern="[0-9]*" min="1" max="31" required label="Qscale">
+                    <div class="fieldDescription">The quality scale of images output by ffmpeg, 1 being the highest quality and 31 being the lowest.</div>
+                </div>
+                <div class="inputContainer">
+                    <input is="emby-input" type="number" id="txtProcessThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
+                    <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
+                    <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
+                    <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
+                    <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
+                </div>
+                <div><button is="emby-button" type="submit" class="raised button-submit block"><span>${Save}</span></button></div>
+            </form>
+        </div>
+    </div>
+</div>

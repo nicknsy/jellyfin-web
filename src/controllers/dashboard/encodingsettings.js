@@ -20,6 +20,7 @@ import alert from '../../components/alert';
         page.querySelector('#chkIntelLpHevcHwEncoder').checked = config.EnableIntelLowPowerHevcHwEncoder;
         page.querySelector('#chkHardwareEncoding').checked = config.EnableHardwareEncoding;
         page.querySelector('#chkAllowHevcEncoding').checked = config.AllowHevcEncoding;
+        page.querySelector('#chkAllowMjpegEncoding').checked = config.AllowMjpegEncoding;
         $('#selectVideoDecoder', page).val(config.HardwareAccelerationType);
         $('#selectThreadCount', page).val(config.EncodingThreadCount);
         $('#txtDownMixAudioBoost', page).val(config.DownMixAudioBoost);
@@ -117,6 +118,7 @@ import alert from '../../components/alert';
                 config.EnableIntelLowPowerHevcHwEncoder = form.querySelector('#chkIntelLpHevcHwEncoder').checked;
                 config.EnableHardwareEncoding = form.querySelector('#chkHardwareEncoding').checked;
                 config.AllowHevcEncoding = form.querySelector('#chkAllowHevcEncoding').checked;
+                config.AllowMjpegEncoding = form.querySelector('#chkAllowMjpegEncoding').checked;
                 ApiClient.updateNamedConfiguration('encoding', config).then(function () {
                     updateEncoder(form);
                 }, function () {
@@ -161,6 +163,9 @@ import alert from '../../components/alert';
         return [{
             href: '#/encodingsettings.html',
             name: globalize.translate('Transcoding')
+        }, {
+            href: '#/trickplayconfiguration.html',
+            name: globalize.translate('Trickplay')
         }, {
             href: '#/playbackconfiguration.html',
             name: globalize.translate('ButtonResume')

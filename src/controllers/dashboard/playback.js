@@ -36,6 +36,9 @@ import Dashboard from '../../utils/dashboard';
             href: '#/encodingsettings.html',
             name: globalize.translate('Transcoding')
         }, {
+            href: '#/trickplayconfiguration.html',
+            name: globalize.translate('Trickplay')
+        }, {
             href: '#/playbackconfiguration.html',
             name: globalize.translate('ButtonResume')
         }, {
@@ -48,7 +51,7 @@ import Dashboard from '../../utils/dashboard';
         $('.playbackConfigurationForm').off('submit', onSubmit).on('submit', onSubmit);
     }).on('pageshow', '#playbackConfigurationPage', function () {
         loading.show();
-        libraryMenu.setTabs('playback', 1, getTabs);
+        libraryMenu.setTabs('playback', 2, getTabs);
         const page = this;
         ApiClient.getServerConfiguration().then(function (config) {
             loadPage(page, config);

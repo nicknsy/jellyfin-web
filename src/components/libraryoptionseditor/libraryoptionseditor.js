@@ -400,8 +400,10 @@ import template from './libraryoptionseditor.template.html';
 
         if (contentType !== 'tvshows' && contentType !== 'movies' && contentType !== 'homevideos' && contentType !== 'musicvideos' && contentType !== 'mixed') {
             parent.querySelector('.chapterSettingsSection').classList.add('hide');
+            parent.querySelector('.trickplaySettingsSection').classList.add('hide');
         } else {
             parent.querySelector('.chapterSettingsSection').classList.remove('hide');
+            parent.querySelector('.trickplaySettingsSection').classList.remove('hide');
         }
 
         if (contentType === 'tvshows') {
@@ -525,6 +527,8 @@ import template from './libraryoptionseditor.template.html';
             EnableRealtimeMonitor: parent.querySelector('.chkEnableRealtimeMonitor').checked,
             ExtractChapterImagesDuringLibraryScan: parent.querySelector('.chkExtractChaptersDuringLibraryScan').checked,
             EnableChapterImageExtraction: parent.querySelector('.chkExtractChapterImages').checked,
+            ExtractTrickplayImagesDuringLibraryScan: parent.querySelector('.chkExtractTrickplayDuringLibraryScan').checked,
+            EnableTrickplayImageExtraction: parent.querySelector('.chkExtractTrickplayImages').checked,
             EnableInternetProviders: true,
             SaveLocalMetadata: parent.querySelector('#chkSaveLocal').checked,
             EnableAutomaticSeriesGrouping: parent.querySelector('.chkAutomaticallyGroupSeries').checked,
@@ -586,6 +590,8 @@ import template from './libraryoptionseditor.template.html';
         parent.querySelector('.chkEnableRealtimeMonitor').checked = options.EnableRealtimeMonitor;
         parent.querySelector('.chkExtractChaptersDuringLibraryScan').checked = options.ExtractChapterImagesDuringLibraryScan;
         parent.querySelector('.chkExtractChapterImages').checked = options.EnableChapterImageExtraction;
+        parent.querySelector('.chkExtractTrickplayDuringLibraryScan').checked = options.ExtractTrickplayImagesDuringLibraryScan;
+        parent.querySelector('.chkExtractTrickplayImages').checked = options.EnableTrickplayImageExtraction;
         parent.querySelector('#chkSaveLocal').checked = options.SaveLocalMetadata;
         parent.querySelector('.chkAutomaticallyGroupSeries').checked = options.EnableAutomaticSeriesGrouping;
         parent.querySelector('#chkEnableEmbeddedTitles').checked = options.EnableEmbeddedTitles;

@@ -122,6 +122,12 @@ export const LEGACY_ADMIN_ROUTES: LegacyRoute[] = [
             view: 'dashboard/playback.html'
         }
     }, {
+        path: 'trickplayconfiguration.html',
+        pageProps: {
+            controller: 'dashboard/trickplay',
+            view: 'dashboard/trickplay.html'
+        }
+    }, {
         path: 'availableplugins.html',
         pageProps: {
             controller: 'dashboard/plugins/available/index',
