@@ -1304,7 +1304,50 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             resetIdle();
         }
 
-        function getTrickplayBubbleHtml(apiClient, trickplayInfo, item, mediaSourceId, positionTicks) {
+        function updateTrickplayBubbleHtml(apiClient, trickplayInfo, item, mediaSourceId, bubble, positionTicks) {
+            let doFullUpdate = false;
+            let chapterThumbContainer = bubble.querySelector('.chapterThumbContainer');
+            let chapterThumb;
+            let chapterThumbText;
+
+            // Create bubble elements if they don't already exist
+            if (chapterThumbContainer) {
+                chapterThumb = chapterThumbContainer.querySelector('.chapterThumb');
+                chapterThumbText = chapterThumbContainer.querySelector('.chapterThumbText');
+            } else {
+                doFullUpdate = true;
+
+                chapterThumbContainer = document.createElement('div');
+                chapterThumbContainer.classList.add('chapterThumbContainer');
+                chapterThumbContainer.style.overflow = 'hidden';
+
+                const chapterThumbWrapper = document.createElement('div');
+                chapterThumbWrapper.classList.add('chapterThumbWrapper');
+                chapterThumbWrapper.style.overflow = 'hidden';
+                chapterThumbWrapper.style.position = 'relative';
+                chapterThumbWrapper.style.width = trickplayInfo.Width + 'px';
+                chapterThumbWrapper.style.height = trickplayInfo.Height + 'px';
+                chapterThumbContainer.appendChild(chapterThumbWrapper);
+
+                chapterThumb = document.createElement('img');
+                chapterThumb.classList.add('chapterThumb');
+                chapterThumb.style.position = 'absolute';
+                chapterThumb.style.width = 'unset';
+                chapterThumb.style.minWidth = 'unset';
+                chapterThumb.style.height = 'unset';
+                chapterThumb.style.minHeight = 'unset';
+                chapterThumbWrapper.appendChild(chapterThumb);
+
+                const chapterThumbTextContainer = document.createElement('div');
+                chapterThumbTextContainer.classList.add('chapterThumbTextContainer');
+                chapterThumbContainer.appendChild(chapterThumbTextContainer);
+
+                chapterThumbText = document.createElement('h2');
+                chapterThumbText.classList.add('chapterThumbText');
+                chapterThumbTextContainer.appendChild(chapterThumbText);
+            }
+
+            // Update trickplay values
             const currentTimeMs = positionTicks / 10_000;
             const currentTile = Math.floor(currentTimeMs / trickplayInfo.Interval);
 
@@ -1317,25 +1360,23 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             const offsetX = -(tileOffsetX * trickplayInfo.Width);
             const offsetY = -(tileOffsetY * trickplayInfo.Height);
 
-            const src = apiClient.getUrl('Videos/' + item.Id + '/Trickplay/' + trickplayInfo.Width + '/' + index + '.jpg', {
+            const imgSrc = apiClient.getUrl('Videos/' + item.Id + '/Trickplay/' + trickplayInfo.Width + '/' + index + '.jpg', {
                 api_key: apiClient.accessToken(),
                 MediaSourceId: mediaSourceId
             });
 
-            if (src) {
-                let html = '<div class="chapterThumbContainer" style="overflow: hidden;">';
-                html += '<div class="chapterThumbWrapper" style="overflow: hidden; position: relative; width: ' + trickplayInfo.Width + 'px; height: ' + trickplayInfo.Height + 'px;">';
-                html += '<img class="chapterThumb" src="' + src + '" style="position: absolute; width: unset; min-width: unset; height: unset; min-height: unset; left: ' + offsetX + 'px; top: ' + offsetY + 'px;" />';
-                html += '</div>';
-                html += '<div class="chapterThumbTextContainer">';
-                html += '<h2 class="chapterThumbText">';
-                html += datetime.getDisplayRunningTime(positionTicks);
-                html += '</h2>';
-                html += '</div>';
-                return html + '</div>';
+            if (chapterThumb.src != imgSrc) chapterThumb.src = imgSrc;
+            chapterThumb.style.left = offsetX + 'px';
+            chapterThumb.style.top = offsetY + 'px';
+
+            chapterThumbText.textContent = datetime.getDisplayRunningTime(positionTicks);
+
+            // Set bubble innerHTML if container isn't part of DOM
+            if (doFullUpdate) {
+                bubble.innerHTML = chapterThumbContainer.outerHTML;
             }
 
-            return null;
+            return true;
         }
 
         function getImgUrl(item, chapter, index, maxWidth, apiClient) {
@@ -1659,6 +1700,33 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             }
         });
 
+        nowPlayingPositionSlider.updateBubbleHtml = function(bubble, value) {
+            showOsd();
+
+            const item = currentItem;
+            let ticks = currentRuntimeTicks;
+            ticks /= 100;
+            ticks *= value;
+
+            if (item && item.Trickplay) {
+                const mediaSourceId = currentPlayer?.streamInfo?.mediaSource?.Id;
+                const trickplayResolutions = item.Trickplay[mediaSourceId];
+
+                if (!trickplayResolutions) return false;
+
+                // TODO: just to test. must pick proper resolution and/or check above that trickplay resolutions has at least one key.
+                return updateTrickplayBubbleHtml(
+                    ServerConnections.getApiClient(item.ServerId),
+                    trickplayResolutions[Object.keys(trickplayResolutions)[0]],
+                    item,
+                    mediaSourceId,
+                    bubble,
+                    ticks);
+            }
+
+            return false;
+        };
+
         nowPlayingPositionSlider.getBubbleHtml = function (value) {
             showOsd();
             if (enableProgressByTimeOfDay) {
@@ -1681,20 +1749,6 @@ import { setBackdropTransparency, TRANSPARENCY_LEVEL } from '../../../components
             ticks /= 100;
             ticks *= value;
             const item = currentItem;
-
-            if (item && item.Trickplay) {
-                const mediaSourceId = currentPlayer?.streamInfo?.mediaSource?.Id;
-                const trickplayResolutions = item.Trickplay[mediaSourceId];
-
-                if (trickplayResolutions) {
-                    // TODO: just to test. must pick proper resolution and/or check above that trickplay resolutions has at least one key.
-                    const html = getTrickplayBubbleHtml(ServerConnections.getApiClient(item.ServerId), trickplayResolutions[Object.keys(trickplayResolutions)[0]], item, mediaSourceId, ticks);
-
-                    if (html) {
-                        return html;
-                    }
-                }
-            }
 
             if (item && item.Chapters && item.Chapters.length && item.Chapters[0].ImageTag) {
                 const html = getChapterBubbleHtml(ServerConnections.getApiClient(item.ServerId), item, item.Chapters, ticks);

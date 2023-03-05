@@ -128,6 +128,10 @@ import globalize from '../../scripts/globalize';
 
             bubble.style.left = bubblePos + 'px';
 
+            if (range.updateBubbleHtml && range.updateBubbleHtml(bubble, value)) {
+                return;
+            }
+
             if (range.getBubbleHtml) {
                 value = range.getBubbleHtml(value);
             } else {
